@@ -16,7 +16,17 @@ public class Hand {
 	 * @author markvandermerwe
 	 */
 	public enum Rank {
-		ROYAL_FLUSH, STRAIGHT_FLUSH, FOUR_OF_A_KIND, FULL_HOUSE, FLUSH, STRAIGHT, THREE_OF_A_KIND, TWO_PAIRS, SINGLE_PAIR, HIGH_CARD
+		ROYAL_FLUSH(0), STRAIGHT_FLUSH(1), FOUR_OF_A_KIND(2), FULL_HOUSE(3), FLUSH(4), STRAIGHT(5), THREE_OF_A_KIND(6), TWO_PAIRS(7), SINGLE_PAIR(8), HIGH_CARD(9);
+		
+		private int rankNum;
+		
+		Rank(int rank) {
+			rankNum = rank;
+		}
+		
+		public int getRankNum() {
+			return rankNum;
+		}
 	}
 
 	private Card[] hand;
@@ -39,6 +49,27 @@ public class Hand {
 		this.deck = deck;
 	}
 
+	public Hand(int card1, int card2, int card3, int card4, int card5, Deck deck) {
+		this.deck = deck;
+		hand = new Card[5];
+		try {
+			hand[0] = deck.getCard(card1);
+			hand[1] = deck.getCard(card2);
+			hand[2] = deck.getCard(card3);
+			hand[3] = deck.getCard(card4);
+			hand[4] = deck.getCard(card5);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	/**
+	 * Populates a hand randomly for the given length.
+	 * 
+	 * @param generator
+	 *            - the random generator used to pick cards.
+	 */
 	public void getRandomHand(Random_Generator generator) {
 		for (int index = 0; index < this.hand.length; index++) {
 			this.hand[index] = this.deck.getCard(generator);
@@ -75,14 +106,14 @@ public class Hand {
 	private int threeOfAKindStart;
 	private int highPairStart;
 	private int lowPairStart;
-	
+
 	public Rank getRank() {
 		suitCount();
 		valueCount();
-		
-		if(isFlush()) {
-			if(isStraight()) {
-				if(isRoyalFlush()) {
+
+		if (isFlush()) {
+			if (isStraight()) {
+				if (isRoyalFlush()) {
 					return Rank.ROYAL_FLUSH;
 				} else {
 					return Rank.STRAIGHT_FLUSH;
@@ -91,32 +122,32 @@ public class Hand {
 				return Rank.FLUSH;
 			}
 		} else {
-			if(isFourOfAKind()) {
+			if (isFourOfAKind()) {
 				return Rank.FOUR_OF_A_KIND;
-			} 
-			
+			}
+
 			countOfThreesAndPairs();
-			
-			if(numThreeOfAKind >= 2 || (numThreeOfAKind == 1 && numPairs >= 1)) {
+
+			if (numThreeOfAKind >= 2 || (numThreeOfAKind == 1 && numPairs >= 1)) {
 				return Rank.FULL_HOUSE;
 			}
-			
-			if(isStraight()) {
+
+			if (isStraight()) {
 				return Rank.STRAIGHT;
 			}
-			
-			if(numThreeOfAKind == 1) {
+
+			if (numThreeOfAKind == 1) {
 				return Rank.THREE_OF_A_KIND;
 			}
-			
-			if(numPairs >= 2) {
+
+			if (numPairs >= 2) {
 				return Rank.TWO_PAIRS;
 			}
-			
-			if(numPairs == 1) {
+
+			if (numPairs == 1) {
 				return Rank.SINGLE_PAIR;
 			}
-			
+
 			return Rank.HIGH_CARD;
 		}
 	}
@@ -199,27 +230,27 @@ public class Hand {
 	private boolean isRoyalFlush() {
 		return valStraightStart == 13;
 	}
-	
+
 	/**
 	 * 
 	 * @return
 	 */
 	private boolean isFourOfAKind() {
-		for(int index = 1; index < 14; index++) {
-			if(valueCount[index] >= 4) {
+		for (int index = 1; index < 14; index++) {
+			if (valueCount[index] >= 4) {
 				fourOfAKindStart = index;
 				return true;
 			}
 		}
 		return false;
 	}
-	
+
 	private void countOfThreesAndPairs() {
-		for(int index = 1; index < 14; index++) {
-			if(valueCount[index] == 3) {
+		for (int index = 1; index < 14; index++) {
+			if (valueCount[index] == 3) {
 				numThreeOfAKind++;
 				threeOfAKindStart = index;
-			}else if(valueCount[index] == 2) {
+			} else if (valueCount[index] == 2) {
 				numPairs++;
 				lowPairStart = highPairStart;
 				highPairStart = index;
@@ -228,7 +259,7 @@ public class Hand {
 	}
 
 	/**
-	 * To string.
+	 * To string for hand.
 	 */
 	public String toString() {
 		String toString = "";

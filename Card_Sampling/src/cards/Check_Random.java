@@ -1,6 +1,8 @@
 /**
  * Mark Van der Merwe and Thomas Oh
  */
+package cards;
+
 import java.util.Arrays;
 
 /**
