@@ -3,6 +3,8 @@
  */
 package cards;
 
+import java.util.HashSet;
+
 /**
  * 
  * @author markvandermerwe
@@ -16,14 +18,15 @@ public class Hand {
 	 * @author markvandermerwe
 	 */
 	public enum Rank {
-		ROYAL_FLUSH(0), STRAIGHT_FLUSH(1), FOUR_OF_A_KIND(2), FULL_HOUSE(3), FLUSH(4), STRAIGHT(5), THREE_OF_A_KIND(6), TWO_PAIRS(7), SINGLE_PAIR(8), HIGH_CARD(9);
-		
+		ROYAL_FLUSH(0), STRAIGHT_FLUSH(1), FOUR_OF_A_KIND(2), FULL_HOUSE(3), FLUSH(4), STRAIGHT(5), THREE_OF_A_KIND(
+				6), TWO_PAIRS(7), SINGLE_PAIR(8), HIGH_CARD(9);
+
 		private int rankNum;
-		
+
 		Rank(int rank) {
 			rankNum = rank;
 		}
-		
+
 		public int getRankNum() {
 			return rankNum;
 		}
@@ -49,19 +52,15 @@ public class Hand {
 		this.deck = deck;
 	}
 
-	public Hand(int card1, int card2, int card3, int card4, int card5, Deck deck) {
-		this.deck = deck;
-		hand = new Card[5];
-		try {
-			hand[0] = deck.getCard(card1);
-			hand[1] = deck.getCard(card2);
-			hand[2] = deck.getCard(card3);
-			hand[3] = deck.getCard(card4);
-			hand[4] = deck.getCard(card5);
-		} catch (Exception e) {
-			e.printStackTrace();
+	public void createHandFromNumbers(Integer[] cardLocations) {
+		for (int card = 0; card < cardLocations.length; card++) {
+			try {
+				hand[card] = deck.getCard(cardLocations[card]);
+			} catch (Exception e) {
+				System.out.println("Card requested doesn't work.");
+				e.printStackTrace();
+			}
 		}
-
 	}
 
 	/**
@@ -71,9 +70,15 @@ public class Hand {
 	 *            - the random generator used to pick cards.
 	 */
 	public void getRandomHand(Random_Generator generator) {
-		for (int index = 0; index < this.hand.length; index++) {
-			this.hand[index] = this.deck.getCard(generator);
+		Integer[] nums = new Integer[hand.length];
+
+		// Use sets to make sure there are no duplicates.
+		HashSet<Integer> numbers = new HashSet<>();
+		while (numbers.size() < hand.length) {
+			numbers.add(generator.next_int(52));
 		}
+
+		createHandFromNumbers(numbers.toArray(nums));
 	}
 
 	/**
@@ -84,15 +89,24 @@ public class Hand {
 	 * @param handTwo
 	 */
 	public static void getTwoRandomHands(Random_Generator generator, Hand handOne, Hand handTwo) {
-		for (int index = 2; index < 7; index++) {
-			Card card = handOne.deck.getCard(generator);
+		Integer[] nums = null;
+
+		// Use sets to make sure there are no duplicates.
+		HashSet<Integer> numbers = new HashSet<>();
+		while (numbers.size() < 9) {
+			numbers.add(generator.next_int(52));
+		}
+		nums = numbers.toArray(nums);
+
+		for (int index = 4; index < 9; index++) {
+			Card card = handOne.deck.getCard(nums[index]);
 			handOne.hand[index] = card;
 			handTwo.hand[index] = card;
 		}
 
 		for (int index = 0; index < 2; index++) {
-			handOne.hand[index] = handOne.deck.getCard(generator);
-			handTwo.hand[index] = handTwo.deck.getCard(generator);
+			handOne.hand[index] = handOne.deck.getCard(nums[index]);
+			handTwo.hand[index] = handTwo.deck.getCard(nums[index+2]);
 		}
 	}
 
@@ -205,7 +219,7 @@ public class Hand {
 
 		for (int index = 13; index >= 4; index--) {
 			if (valueCount[index] != 0) {
-				for (int straightCount = index; straightCount > index - 4 && straightCount >= 0; straightCount--) {
+				for (int straightCount = index-1; straightCount >= index - 4 && straightCount >= 0; straightCount--) {
 					if (valueCount[straightCount] == 0) {
 						isStraight = false;
 						break;

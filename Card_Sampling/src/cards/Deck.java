@@ -8,8 +8,6 @@ package cards;
  *
  */
 public class Deck {
-	
-	private boolean nullify = true;
 
 	private final static Card[] deck = new Card[52];
 	static {
@@ -17,46 +15,11 @@ public class Deck {
 			deck[i] = new Card(i);
 		}
 	}
-	
-	public Deck(boolean nullify) {
-		this.nullify = nullify;
-	}
 
-	/**
-	 * Get a card based on its index;
-	 * 
-	 * @param index
-	 * @return
-	 */
-	public Card getCard(Random_Generator generator) {
-		Card card;
-		int index;
-		do {
-			index = generator.next_int(52);
-			card = deck[index];
-		} while (card == null);
-
-		if(nullify) deck[index] = null;
-			
-		return card;
-	}
-
-	public Card getCard(int position) throws Exception {
+	public Card getCard(int position) {
 		Card card = deck[position];
-
-		if (card == null) {
-			// Die a horrible death.
-			throw new Exception();
-		}
-
-		if(nullify) deck[position] = null;
 		
 		return card;
-	}
-
-	// Maybe later.
-	public void Shuffle() {
-
 	}
 
 }
