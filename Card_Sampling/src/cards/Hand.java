@@ -4,6 +4,7 @@
 package cards;
 
 import java.util.HashSet;
+import java.util.TreeSet;
 
 /**
  * 
@@ -88,11 +89,20 @@ public class Hand {
 	 * @param handOne
 	 * @param handTwo
 	 */
-	public static void getTwoRandomHands(Random_Generator generator, Hand handOne, Hand handTwo) {
+	public static void getTwoRandomHands(Random_Generator generator, Hand handOne, Hand handTwo, int[] handOneCards,
+			int[] handTwoCards) {
 		Integer[] nums = null;
 
 		// Use sets to make sure there are no duplicates.
-		HashSet<Integer> numbers = new HashSet<>();
+		TreeSet<Integer> numbers = new TreeSet<>();
+
+		for (int index = 0; index < 2; index++) {
+			handOne.hand[index] = handOne.deck.getCard(handOneCards[index]);
+			numbers.add(handOneCards[index]);
+			handTwo.hand[index] = handTwo.deck.getCard(handTwoCards[index]);
+			numbers.add(handTwoCards[index]);
+		}
+
 		while (numbers.size() < 9) {
 			numbers.add(generator.next_int(52));
 		}
@@ -103,20 +113,79 @@ public class Hand {
 			handOne.hand[index] = card;
 			handTwo.hand[index] = card;
 		}
+	}
 
-		for (int index = 0; index < 2; index++) {
-			handOne.hand[index] = handOne.deck.getCard(nums[index]);
-			handTwo.hand[index] = handTwo.deck.getCard(nums[index+2]);
+	public static int compareTwoHands(Hand handOne, Hand handTwo) {
+		int diff = handOne.getRank().getRankNum() - handTwo.getRank().getRankNum();
+		
+		if(diff > 0) {
+			return 1;
+		} else if(diff < 0) {
+			return -1;
+		} else {
+			switch(handOne.getRank()) {
+			case ROYAL_FLUSH:
+				return 0;	
+			case STRAIGHT_FLUSH:
+				return handOne.valStraightStart - handTwo.valStraightStart;
+			case FOUR_OF_A_KIND:
+				return handOne.fourOfAKindStart - handTwo.fourOfAKindStart;
+			case FULL_HOUSE:
+				diff = handOne.threeOfAKindStart - handTwo.threeOfAKindStart;
+				if(diff != 0) {
+					return diff;
+				} else {
+					return handOne.highPairStart = handTwo.highPairStart;
+				}
+			case FLUSH:
+				return handOne.flushStart - handTwo.flushStart;
+			case STRAIGHT:
+				return handOne.valStraightStart - handTwo.valStraightStart;
+			case THREE_OF_A_KIND:
+				return handOne.threeOfAKindStart - handTwo.threeOfAKindStart;
+			case TWO_PAIRS:
+				diff = handOne.highPairStart - handTwo.highPairStart;
+				if(diff != 0) {
+					return diff;
+				} else {
+					return handOne.lowPairStart - handTwo.lowPairStart;
+				}
+			case SINGLE_PAIR:
+				diff = handOne.highPairStart - handTwo.highPairStart;
+				if(diff != 0) {
+					return diff;
+				} else {
+					for(int index = 13; index >= 0; index--) {
+						if(handOne.valueCount[index] == 1 && handTwo.valueCount[index] == 0) {
+							return 1;
+						}else if (handOne.valueCount[index] == 0 && handTwo.valueCount[index] == 1) {
+							return -1;
+						}
+					}
+					return 0;
+				}
+			default:
+				for(int index = 13; index >= 0; index--) {
+					if(handOne.valueCount[index] == 1 && handTwo.valueCount[index] == 0) {
+						return 1;
+					}else if (handOne.valueCount[index] == 0 && handTwo.valueCount[index] == 1) {
+						return -1;
+					}
+				}
+			}
 		}
+		return 0;
 	}
 
 	// Instance variables to help determine rank.
 	private int[] suitCount;
 	private int[] valueCount;
-	private int valStraightStart;
-	private int fourOfAKindStart;
 	private int numThreeOfAKind = 0;
 	private int numPairs = 0;
+
+	private int valStraightStart;
+	private int flushStart = -1;
+	private int fourOfAKindStart;
 	private int threeOfAKindStart;
 	private int highPairStart;
 	private int lowPairStart;
@@ -203,6 +272,13 @@ public class Hand {
 	private boolean isFlush() {
 		for (int index = 0; index < 4; index++) {
 			if (suitCount[index] >= 5) {
+				for (int ind = 0; ind < this.hand.length; ind++) {
+					if (hand[ind].getSuit().getSuitNum() == index) {
+						if (hand[ind].getValue() > flushStart) {
+							flushStart = hand[ind].getValue();
+						}
+					}
+				}
 				return true;
 			}
 		}
@@ -219,7 +295,7 @@ public class Hand {
 
 		for (int index = 13; index >= 4; index--) {
 			if (valueCount[index] != 0) {
-				for (int straightCount = index-1; straightCount >= index - 4 && straightCount >= 0; straightCount--) {
+				for (int straightCount = index - 1; straightCount >= index - 4 && straightCount >= 0; straightCount--) {
 					if (valueCount[straightCount] == 0) {
 						isStraight = false;
 						break;

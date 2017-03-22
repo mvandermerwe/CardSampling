@@ -36,6 +36,24 @@ public class Odds {
 	}
 
 	static double odds_to_win(int h1c1, int h1c2, int h2c1, int h2c2, int samples) {
+		int[] handOneCards = new int[]{h1c1, h1c2};
+		int[] handTwoCards = new int[]{h2c1, h2c2};
+		Deck deck = new Deck();
+		
+		for(int run = 0; run < samples; run++) {
+			Hand hand1 = null;
+			Hand hand2 = null;
+			try {
+				hand1 = new Hand(7, deck);
+				hand2 = new Hand(7, deck);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			Hand.getTwoRandomHands(randomGenerator, hand1, hand2, handOneCards, handTwoCards);
+			
+		}
+		
 		return -1;
 	}
 
