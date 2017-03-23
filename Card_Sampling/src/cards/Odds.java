@@ -3,6 +3,9 @@
  */
 package cards;
 
+import java.io.FileWriter;
+import java.io.IOException;
+
 /**
  * 
  * @author markvandermerwe
@@ -11,36 +14,61 @@ package cards;
 public class Odds {
 
 	private static Random_Generator randomGenerator;
+	
+	private static double[] exhaustivePercentages;
+	
+	final static int START_TEST_COUNT = 100;
+	final static int END_TEST_COUNT = 10_000_000;
+	final static int INCREMENT = 500_000;
 
 	public static void main(String[] args) {
-		double total = 0;
-		double[] percentages = percentage_per_hand_category_exhaustive(5);
-		
-		randomGenerator = new Javas_Random_Generator();
+		// Define our randomGenerator to use.
+		randomGenerator = new My_Best_Random_Generator();
 
-		System.out.println("Exhaustive Tests:");
-		for (double percent : percentages) {
-			System.out.println(percent);
-			total += percent;
-		}
-		System.out.println("Total: " + total);
+		performExhaustiveTests();
+		performStochasticTests();
 		
-		total = 0;
-		percentages = percentage_per_hand_category_stochastic(5, 1000000);
-		System.out.println("Exhaustive Tests:");
-		for (double percent : percentages) {
-			System.out.println(percent);
-			total += percent;
+		//System.out.println(odds_to_win(13,14,0,1, 1_000_000));
+	}
+
+	private static void performExhaustiveTests() {
+		exhaustivePercentages = percentage_per_hand_category_exhaustive(5);
+
+//		System.out.println("Exhaustive Tests:");
+//		for (double percent : exhaustivePercentages) {
+//			System.out.println(percent);
+//		}
+	}
+	
+	private static void performStochasticTests() {
+		StringBuilder stochasticData = new StringBuilder();
+		
+		for(int runs = START_TEST_COUNT; runs < END_TEST_COUNT; runs+=INCREMENT) {
+			double error = 0;
+			
+			for(int test = 0; test < 100; test++) {
+				double[] percentages = percentage_per_hand_category_stochastic(5, runs);
+				
+				for(int rank = 0; rank < 10; rank++) {
+					error += Math.abs(exhaustivePercentages[rank] - percentages[rank]);
+				}
+			}
+			
+			stochasticData.append(runs + "," + error);
+			System.out.println(runs + "," + error);
 		}
-		System.out.println("Total: " + total);
+
+		sendToFile(stochasticData, "stochastic.csv");
 	}
 
 	static double odds_to_win(int h1c1, int h1c2, int h2c1, int h2c2, int samples) {
-		int[] handOneCards = new int[]{h1c1, h1c2};
-		int[] handTwoCards = new int[]{h2c1, h2c2};
+		int[] handOneCards = new int[] { h1c1, h1c2 };
+		int[] handTwoCards = new int[] { h2c1, h2c2 };
 		Deck deck = new Deck();
-		
-		for(int run = 0; run < samples; run++) {
+
+		int handsWon = 0;
+
+		for (int run = 0; run < samples; run++) {
 			Hand hand1 = null;
 			Hand hand2 = null;
 			try {
@@ -49,12 +77,14 @@ public class Odds {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
+
 			Hand.getTwoRandomHands(randomGenerator, hand1, hand2, handOneCards, handTwoCards);
-			
+			if (Hand.compareTwoHands(hand1, hand2) > 0) {
+				handsWon++;
+			}
 		}
-		
-		return -1;
+
+		return (double) handsWon / samples;
 	}
 
 	static double[] percentage_per_hand_category_exhaustive(int hand_size) {
@@ -122,5 +152,24 @@ public class Odds {
 		}
 
 		return ranks;
+	}
+
+	/**
+	 * Helper method for writing our data to a CSV file.
+	 * 
+	 * @param fileData
+	 *            - the data to be put into the file.
+	 * @param filename
+	 *            - the name of the file to write to.
+	 */
+	private static void sendToFile(StringBuilder fileData, String filename) {
+		try {
+			FileWriter csvWriter = new FileWriter(filename);
+			csvWriter.write(fileData.toString());
+			csvWriter.close();
+		} catch (IOException e) {
+			System.out.println("Unable to write to file. Here is the test data, though:");
+			System.out.print(fileData.toString());
+		}
 	}
 }

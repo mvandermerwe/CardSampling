@@ -4,6 +4,7 @@
 package cards;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.TreeSet;
 
 /**
@@ -91,10 +92,10 @@ public class Hand {
 	 */
 	public static void getTwoRandomHands(Random_Generator generator, Hand handOne, Hand handTwo, int[] handOneCards,
 			int[] handTwoCards) {
-		Integer[] nums = null;
+		Integer[] nums = new Integer[9];
 
 		// Use sets to make sure there are no duplicates.
-		TreeSet<Integer> numbers = new TreeSet<>();
+		LinkedHashSet<Integer> numbers = new LinkedHashSet<>();
 
 		for (int index = 0; index < 2; index++) {
 			handOne.hand[index] = handOne.deck.getCard(handOneCards[index]);
@@ -110,13 +111,13 @@ public class Hand {
 
 		for (int index = 4; index < 9; index++) {
 			Card card = handOne.deck.getCard(nums[index]);
-			handOne.hand[index] = card;
-			handTwo.hand[index] = card;
+			handOne.hand[index-2] = card;
+			handTwo.hand[index-2] = card;
 		}
 	}
 
 	public static int compareTwoHands(Hand handOne, Hand handTwo) {
-		int diff = handOne.getRank().getRankNum() - handTwo.getRank().getRankNum();
+		int diff =  handTwo.getRank().getRankNum() - handOne.getRank().getRankNum();
 		
 		if(diff > 0) {
 			return 1;
@@ -258,7 +259,7 @@ public class Hand {
 		valueCount = new int[14];
 		for (int index = 0; index < hand.length; index++) {
 			valueCount[hand[index].getValue() - 1]++;
-			if (hand[index].getValue() == 13) {
+			if (hand[index].getValue() == 14) {
 				valueCount[0]++;
 			}
 		}
