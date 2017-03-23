@@ -49,6 +49,7 @@ public class Card {
 	private int value;
 
 	/**
+	 * Constructor for card
 	 * 
 	 * @param suit
 	 * @param value
@@ -61,7 +62,7 @@ public class Card {
 	/**
 	 * Constructor based on position.
 	 * 
-	 * @param position
+	 * @param position position in the deck
 	 */
 	public Card(int position) {
 		// Determining the suit of the card.
@@ -126,6 +127,8 @@ public class Card {
 
 	/**
 	 * Return string representation of the current card object.
+	 * 
+	 * @return string of card
 	 */
 	public String toString() {
 		return value + " of " + suit.toString();

@@ -54,6 +54,12 @@ public class Hand {
 		this.deck = deck;
 	}
 
+	/**
+	 * Creates a hand by using an array with positions that correlate
+	 * to a cards location in the deck
+	 * 
+	 * @param cardLocations array containing the locations of the cards
+	 */
 	public void createHandFromNumbers(Integer[] cardLocations) {
 		for (int card = 0; card < cardLocations.length; card++) {
 			try {
@@ -84,9 +90,10 @@ public class Hand {
 	}
 
 	/**
+	 * Generates 5 random cards to compare both hands
 	 * Assumes both hands are size seven and are part of the same deck.
 	 * 
-	 * @param generator
+	 * @param generator random generator to pick cards
 	 * @param handOne
 	 * @param handTwo
 	 */
@@ -116,6 +123,15 @@ public class Hand {
 		}
 	}
 
+	/**
+	 * Compares the cards between two hands and determines which one wins. A positive
+	 * value will be returned if hand one wins, negative if hand two wins, and zero for
+	 * a draw. If ranks are a draw, kickers or high card will be checked if possible.
+	 * 
+	 * @param handOne
+	 * @param handTwo
+	 * @return result of one hand versus the other
+	 */
 	public static int compareTwoHands(Hand handOne, Hand handTwo) {
 		int diff =  handTwo.getRank().getRankNum() - handOne.getRank().getRankNum();
 		
@@ -191,6 +207,11 @@ public class Hand {
 	private int highPairStart;
 	private int lowPairStart;
 
+	/**
+	 * Find the rank of the hand
+	 * 
+	 * @return Rank of the hand
+	 */
 	public Rank getRank() {
 		suitCount();
 		valueCount();
@@ -323,8 +344,9 @@ public class Hand {
 	}
 
 	/**
+	 * Checks for four of a kind
 	 * 
-	 * @return
+	 * @return result of check
 	 */
 	private boolean isFourOfAKind() {
 		for (int index = 1; index < 14; index++) {
@@ -336,6 +358,10 @@ public class Hand {
 		return false;
 	}
 
+	/**
+	 * Tracks numbers of three of kinds and pairs. Also keeps
+	 * track of the largest three of a kind and high pair.
+	 */
 	private void countOfThreesAndPairs() {
 		for (int index = 1; index < 14; index++) {
 			if (valueCount[index] == 3) {
@@ -351,6 +377,8 @@ public class Hand {
 
 	/**
 	 * To string for hand.
+	 * 
+	 * @return string for hand
 	 */
 	public String toString() {
 		String toString = "";

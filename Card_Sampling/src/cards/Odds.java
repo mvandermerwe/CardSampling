@@ -37,6 +37,11 @@ public class Odds {
 		// System.out.println(odds_to_win(13,14,0,1, 1_000_000));
 	}
 
+	/**
+	 * prints results of tests
+	 * 
+	 * @param data array holding the data
+	 */
 	public static void printData(double[] data) {
 		for (int index = 0; index < data.length; index++) {
 			System.out.println(data[index]);
@@ -46,6 +51,8 @@ public class Odds {
 	/**
 	 * Checks and ranks eery possible combination of cards and calculates the
 	 * probability of each rank.
+	 * 
+	 * @param handSize
 	 */
 	private static void performExhaustiveTests(int handSize) {
 		exhaustivePercentages = percentage_per_hand_category_exhaustive(handSize);
@@ -58,6 +65,8 @@ public class Odds {
 
 	/**
 	 * Runs a set number of tests to find the probability of each rank
+	 * 
+	 * @param handSize
 	 */
 	private static void performStochasticTests(int handSize) {
 		StringBuilder stochasticData = new StringBuilder();
@@ -81,7 +90,9 @@ public class Odds {
 	}
 
 	/**
-	 * Runs a set number of tests to find the probability of each rank
+	 * Times tests run to find probability of ranks
+	 * 
+	 * @param cardSize handSize
 	 */
 	private static void timeStochasticTests(int cardSize) {
 		StringBuilder timeData = new StringBuilder();
