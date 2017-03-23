@@ -4,8 +4,9 @@
 package cards;
 
 /**
+ * Creates the deck of 52 cards to be used for testing.
+ * 
  * @author Mark Van der Merwe and Thomas Oh
- *
  */
 public class Deck {
 
