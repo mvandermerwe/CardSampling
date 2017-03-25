@@ -8,6 +8,8 @@ import java.util.LinkedHashSet;
 import java.util.TreeSet;
 
 /**
+ * Hand represents a hand of cards that has a rank and 5 or 7 cards associated
+ * with it.
  * 
  * @author markvandermerwe
  *
@@ -25,10 +27,21 @@ public class Hand {
 
 		private int rankNum;
 
+		/**
+		 * Constructor adds a value to an enum.
+		 * 
+		 * @param rank
+		 *            - val of enum.
+		 */
 		Rank(int rank) {
 			rankNum = rank;
 		}
 
+		/**
+		 * Get the value of an enum object.
+		 * 
+		 * @return - val of enum.
+		 */
 		public int getRankNum() {
 			return rankNum;
 		}
@@ -38,7 +51,7 @@ public class Hand {
 	private Deck deck;
 
 	/**
-	 * Set size of hand.
+	 * Set size of hand when constructing object.
 	 * 
 	 * @param sizeOfHand
 	 *            - must be either 5 or 7!
@@ -55,10 +68,11 @@ public class Hand {
 	}
 
 	/**
-	 * Creates a hand by using an array with positions that correlate
-	 * to a cards location in the deck
+	 * Creates a hand by using an array with positions that correlate to a cards
+	 * location in the deck.
 	 * 
-	 * @param cardLocations array containing the locations of the cards
+	 * @param cardLocations
+	 *            array containing the locations of the cards
 	 */
 	public void createHandFromNumbers(Integer[] cardLocations) {
 		for (int card = 0; card < cardLocations.length; card++) {
@@ -90,10 +104,11 @@ public class Hand {
 	}
 
 	/**
-	 * Generates 5 random cards to compare both hands
-	 * Assumes both hands are size seven and are part of the same deck.
+	 * Generates 5 random cards to compare both hands. Assumes both hands are
+	 * size seven and are part of the same deck. Used to analyze Texas Hold'em
 	 * 
-	 * @param generator random generator to pick cards
+	 * @param generator
+	 *            random generator to pick cards
 	 * @param handOne
 	 * @param handTwo
 	 */
@@ -104,6 +119,8 @@ public class Hand {
 		// Use sets to make sure there are no duplicates.
 		LinkedHashSet<Integer> numbers = new LinkedHashSet<>();
 
+		// Set first cards in hands based on the provided card indices. Also add
+		// them to set so no duplicates occur.
 		for (int index = 0; index < 2; index++) {
 			handOne.hand[index] = handOne.deck.getCard(handOneCards[index]);
 			numbers.add(handOneCards[index]);
@@ -111,6 +128,7 @@ public class Hand {
 			numbers.add(handTwoCards[index]);
 		}
 
+		// Randomly generate and place the five cards to go with the two hands.
 		while (numbers.size() < 9) {
 			numbers.add(generator.next_int(52));
 		}
@@ -118,74 +136,92 @@ public class Hand {
 
 		for (int index = 4; index < 9; index++) {
 			Card card = handOne.deck.getCard(nums[index]);
-			handOne.hand[index-2] = card;
-			handTwo.hand[index-2] = card;
+			handOne.hand[index - 2] = card;
+			handTwo.hand[index - 2] = card;
 		}
 	}
 
 	/**
-	 * Compares the cards between two hands and determines which one wins. A positive
-	 * value will be returned if hand one wins, negative if hand two wins, and zero for
-	 * a draw. If ranks are a draw, kickers or high card will be checked if possible.
+	 * Compares the cards between two hands and determines which one wins. A
+	 * positive value will be returned if hand one wins, negative if hand two
+	 * wins, and zero for a draw. If ranks are a draw, kickers or high card will
+	 * be checked if possible.
 	 * 
 	 * @param handOne
 	 * @param handTwo
 	 * @return result of one hand versus the other
 	 */
 	public static int compareTwoHands(Hand handOne, Hand handTwo) {
-		int diff =  handTwo.getRank().getRankNum() - handOne.getRank().getRankNum();
-		
-		if(diff > 0) {
+		// Get rank and compare.
+		int diff = handTwo.getRank().getRankNum() - handOne.getRank().getRankNum();
+
+		if (diff > 0) {
+			// If the difference between rank is positive, hand one wins, return
+			// >0.
 			return 1;
-		} else if(diff < 0) {
+		} else if (diff < 0) {
+			// If negative, hand one loses.
 			return -1;
 		} else {
-			switch(handOne.getRank()) {
+			// Given a tie, we handle several ways.
+			switch (handOne.getRank()) {
+			// Royal flush just ties.
 			case ROYAL_FLUSH:
-				return 0;	
+				return 0;
+			// Straight flush - compare the highest card in the straight.
 			case STRAIGHT_FLUSH:
 				return handOne.valStraightStart - handTwo.valStraightStart;
+			// Four of a kind - compare the four of a kind by the val of which
+			// each has four.
 			case FOUR_OF_A_KIND:
 				return handOne.fourOfAKindStart - handTwo.fourOfAKindStart;
+			// Compare first the three of a kind and then the pair for a tied
+			// full house.
 			case FULL_HOUSE:
 				diff = handOne.threeOfAKindStart - handTwo.threeOfAKindStart;
-				if(diff != 0) {
+				if (diff != 0) {
 					return diff;
 				} else {
 					return handOne.highPairStart = handTwo.highPairStart;
 				}
+				// Compare the flush high card.
 			case FLUSH:
 				return handOne.flushStart - handTwo.flushStart;
+			// Compare the straight high card.
 			case STRAIGHT:
 				return handOne.valStraightStart - handTwo.valStraightStart;
+			// Compare the three of a kind high card.
 			case THREE_OF_A_KIND:
 				return handOne.threeOfAKindStart - handTwo.threeOfAKindStart;
+			// Compare the high pair high card.
 			case TWO_PAIRS:
 				diff = handOne.highPairStart - handTwo.highPairStart;
-				if(diff != 0) {
+				if (diff != 0) {
 					return diff;
 				} else {
 					return handOne.lowPairStart - handTwo.lowPairStart;
 				}
+				// Compare the highest pair.
 			case SINGLE_PAIR:
 				diff = handOne.highPairStart - handTwo.highPairStart;
-				if(diff != 0) {
+				if (diff != 0) {
 					return diff;
 				} else {
-					for(int index = 13; index >= 0; index--) {
-						if(handOne.valueCount[index] == 1 && handTwo.valueCount[index] == 0) {
+					for (int index = 13; index >= 0; index--) {
+						if (handOne.valueCount[index] == 1 && handTwo.valueCount[index] == 0) {
 							return 1;
-						}else if (handOne.valueCount[index] == 0 && handTwo.valueCount[index] == 1) {
+						} else if (handOne.valueCount[index] == 0 && handTwo.valueCount[index] == 1) {
 							return -1;
 						}
 					}
 					return 0;
 				}
+				// Compare the highest card.
 			default:
-				for(int index = 13; index >= 0; index--) {
-					if(handOne.valueCount[index] == 1 && handTwo.valueCount[index] == 0) {
+				for (int index = 13; index >= 0; index--) {
+					if (handOne.valueCount[index] == 1 && handTwo.valueCount[index] == 0) {
 						return 1;
-					}else if (handOne.valueCount[index] == 0 && handTwo.valueCount[index] == 1) {
+					} else if (handOne.valueCount[index] == 0 && handTwo.valueCount[index] == 1) {
 						return -1;
 					}
 				}
@@ -213,9 +249,11 @@ public class Hand {
 	 * @return Rank of the hand
 	 */
 	public Rank getRank() {
+		//Count the number of each suit and value.
 		suitCount();
 		valueCount();
 
+		// This is all pretty self explanatory by the name of the functions.
 		if (isFlush()) {
 			if (isStraight()) {
 				if (isRoyalFlush()) {
@@ -359,8 +397,8 @@ public class Hand {
 	}
 
 	/**
-	 * Tracks numbers of three of kinds and pairs. Also keeps
-	 * track of the largest three of a kind and high pair.
+	 * Tracks numbers of three of kinds and pairs. Also keeps track of the
+	 * largest three of a kind and high pair.
 	 */
 	private void countOfThreesAndPairs() {
 		for (int index = 1; index < 14; index++) {

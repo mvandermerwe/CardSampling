@@ -20,10 +20,21 @@ public class Card {
 
 		private int suitNum;
 
+		/**
+		 * Constructor defines value of enum.
+		 * 
+		 * @param suitNum
+		 *            - value of enum.
+		 */
 		Suit(int suitNum) {
 			this.suitNum = suitNum;
 		}
 
+		/**
+		 * Get the value of each enum.
+		 * 
+		 * @return - val of enum
+		 */
 		public int getSuitNum() {
 			return suitNum;
 		}
@@ -62,7 +73,8 @@ public class Card {
 	/**
 	 * Constructor based on position.
 	 * 
-	 * @param position position in the deck
+	 * @param position
+	 *            position in the deck
 	 */
 	public Card(int position) {
 		// Determining the suit of the card.
@@ -106,7 +118,7 @@ public class Card {
 	public boolean sameSuit(Card otherCard) {
 		return suit.equals(otherCard.suit);
 	}
-	
+
 	/**
 	 * Getter for suit.
 	 * 
@@ -115,7 +127,7 @@ public class Card {
 	public Suit getSuit() {
 		return suit;
 	}
-	
+
 	/**
 	 * Getter for value.
 	 * 

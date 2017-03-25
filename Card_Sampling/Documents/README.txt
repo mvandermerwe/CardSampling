@@ -15,7 +15,11 @@ We create a poor and better random generator for the analysis.
 
 Notes to the TA's
 -------------------------------------
-
+To perform our Texas Hold'Em analysis, we created another function that could use our odds_to_win
+function to test random hands against each hand in the scope provided (i.e., Ace w/ Ace, Ace w/ Heart).
+This tests 1500 hands against the current one (by looking at 1500 possibilities on the table). We
+then average all the likelihoods of winnings to get an estimate of that hand's likelihood of winning at
+any time.
 
 Pledge
 -------------------------------------

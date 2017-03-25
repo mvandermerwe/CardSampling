@@ -6,11 +6,13 @@ package cards;
 /**
  * Creates a generator that follow the formula Xnext = (a * X + b) % m
  * Where X is the integer, a is the multiplier, b is the increment, and m is the mask.
+ * Uses Linear Congruential method.
  */
 public class My_Best_Random_Generator implements Random_Generator {
 
-	private long multiplier = 0x5DEECE66DL;
-	private long increment = 0xBL;
+	//Numbers found online.
+	private long multiplier = 1664525;
+	private long increment = 1013904223;
 	
 	private static final long mask = (1L << 48) - 1;
 	

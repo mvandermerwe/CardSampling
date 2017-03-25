@@ -163,11 +163,11 @@ public class Check_Random {
 	 * Test the check_random class with a random number generator
 	 */
 	public static void main(String[] args) {
-		// System.out.println("---------------------------------------");
-		// System.out.println("Testing Poor Random Number Generator");
+		 System.out.println("---------------------------------------");
+		 System.out.println("Testing Poor Random Number Generator");
 		 Random_Generator j_rand = new Poor_Random_Generator();
 		 Check_Random check_rand = new Check_Random();
-		// check_rand.check_random(j_rand, 0);
+		 check_rand.check_random(j_rand, 0);
 
 		System.out.println("---------------------------------------");
 		System.out.println("Testing Java's Random Number Generator");

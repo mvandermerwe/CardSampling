@@ -5,6 +5,8 @@ package cards;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 /**
  * 
@@ -15,32 +17,45 @@ public class Odds {
 
 	private static Random_Generator randomGenerator;
 
+	// Store exhaustively calculated percentages for comparison.
 	private static double[] exhaustivePercentages;
 
+	// Some variables that define test iteration amounts.
 	final static int START_TEST_COUNT = 100;
-	final static int END_TEST_COUNT = 10_000_000;
-	final static int INCREMENT = 500_000;
+	final static int END_TEST_COUNT = 2_000_000;
+	final static int INCREMENT = 200_000;
 
 	public static void main(String[] args) {
 		// Define our randomGenerator to use.
-		randomGenerator = new Javas_Random_Generator();
+		randomGenerator = new My_Best_Random_Generator();
 
+		// Below we have our tests to determine error given different stochastic
+		// samples.
 		performExhaustiveTests(7);
-		///printData(exhaustivePercentages);
-
-		// double[] percentages = percentage_per_hand_category_stochastic(5,
-		// 1000000);
-		// printData(percentages);
-
 		performStochasticTests(7);
 
-		// System.out.println(odds_to_win(13,14,0,1, 1_000_000));
+		// Test timing of stochastic tests.
+		// timeStochasticTests(5);
+		// timeExhaustiveTests(7);
+
+		// Try all possible hands within scope against some random ones.
+		//testExhaustiveTexasHand(39, 52, 39, 52, false);
+		//testExhaustiveTexasHand(39, 52, 26, 39, true);
+
+		// Test out Texas Hold'Em card examples from Analysis doc.
+		//Ace,Ace v. King, King
+		//System.out.println(odds_to_win(12,24,11,23, 1_000_000));
+		//Ace,Ace v. Ace, King
+		//System.out.println(odds_to_win(12,24,36,35, 1_000_000));
+		//2,8 v. Ace, Ace
+		//System.out.println(odds_to_win(0,6,12,24, 1_000_000));
 	}
 
 	/**
-	 * prints results of tests
+	 * Prints the data in a double array to console - used for debugging.
 	 * 
-	 * @param data array holding the data
+	 * @param data
+	 *            - double array to print.
 	 */
 	public static void printData(double[] data) {
 		for (int index = 0; index < data.length; index++) {
@@ -49,10 +64,8 @@ public class Odds {
 	}
 
 	/**
-	 * Checks and ranks eery possible combination of cards and calculates the
+	 * Checks and ranks every possible combination of cards and calculates the
 	 * probability of each rank.
-	 * 
-	 * @param handSize
 	 */
 	private static void performExhaustiveTests(int handSize) {
 		exhaustivePercentages = percentage_per_hand_category_exhaustive(handSize);
@@ -64,9 +77,11 @@ public class Odds {
 	}
 
 	/**
-	 * Runs a set number of tests to find the probability of each rank
+	 * Runs a set number of tests to find the probability of each rank using
+	 * stochastic sampling.
 	 * 
 	 * @param handSize
+	 *            - size of the hand to test on.
 	 */
 	private static void performStochasticTests(int handSize) {
 		StringBuilder stochasticData = new StringBuilder();
@@ -74,40 +89,101 @@ public class Odds {
 		for (int runs = START_TEST_COUNT; runs < END_TEST_COUNT; runs += INCREMENT) {
 			double error = 0.0;
 
+			// At each size, run analysis 100 times to determine average.
 			for (int test = 0; test < 100; test++) {
 				double[] percentages = percentage_per_hand_category_stochastic(handSize, runs);
 
+				// Sum up the error by finding the difference between the exact
+				// percentage and estimated percentage.
 				for (int rank = 0; rank < 10; rank++) {
 					error += Math.abs(exhaustivePercentages[rank] - percentages[rank]) / 100;
 				}
 			}
 
-			stochasticData.append(runs + "," + error);
+			stochasticData.append(runs + "," + error + "\n");
 			System.out.println(runs + "," + error);
 		}
 
-		sendToFile(stochasticData, "stochastic.csv");
+		sendToFile(stochasticData, "stochasticPoor.csv");
 	}
 
 	/**
-	 * Times tests run to find probability of ranks
-	 * 
-	 * @param cardSize handSize
+	 * Times a set number of tests to find the probability of each rank
 	 */
 	private static void timeStochasticTests(int cardSize) {
 		StringBuilder timeData = new StringBuilder();
 
+		// At each test count size, time how long the test takes to run.
 		for (int runs = START_TEST_COUNT; runs < END_TEST_COUNT; runs += INCREMENT) {
 			long startTime = System.nanoTime();
 			percentage_per_hand_category_stochastic(cardSize, runs);
 			long endTime = System.nanoTime();
-			long time = endTime - startTime;
+			double time = (endTime - startTime) / Math.pow(10, 9);
 
-			timeData.append(runs + "," + time);
+			timeData.append(runs + "," + time + "\n");
 			System.out.println(runs + "," + time);
 		}
-
+		// Send data to file.
 		sendToFile(timeData, "time" + cardSize + ".csv");
+	}
+
+	/**
+	 * Times a set number of tests to find the probability of each rank
+	 */
+	private static void timeExhaustiveTests(int cardSize) {
+		double time = 0.0;
+
+		long startTime = System.nanoTime();
+		percentage_per_hand_category_exhaustive(cardSize);
+		long endTime = System.nanoTime();
+		time += (endTime - startTime) / Math.pow(10, 9);
+
+		System.out.println("Exhaustive: " + time);
+	}
+
+	private static void testExhaustiveTexasHand(int card1Start, int card1End, int card2Start, int card2End,
+			boolean diffSuite) {
+		StringBuilder cardData = new StringBuilder();
+		Integer[] nums = new Integer[4];
+
+		// Using the parameters, go through the card possibilites.
+		for (int card1 = card1Start; card1 < card1End; card1++) {
+			for (int card2 = card2Start; card2 < card2End; card2++) {
+				// No repeats, lets use reuse code.
+				if (!diffSuite && (card2 <= card1)) {
+					continue;
+				}
+				// Use sets to make sure there are no duplicates.
+				LinkedHashSet<Integer> numbers = new LinkedHashSet<>();
+				double oddsToWin = 0;
+
+				for (int test = 0; test < 1500; test++) {
+					numbers.add(card1);
+					numbers.add(card2);
+
+					// Generate our other random hand to test against.
+					while (numbers.size() < 4) {
+						numbers.add(randomGenerator.next_int(52));
+					}
+
+					nums = numbers.toArray(nums);
+					// For the given random hand compared to the set hand,
+					// generate odds of winning.
+					oddsToWin += odds_to_win(card1, card2, nums[2], nums[3], 10_000) / 1500;
+
+					numbers.clear();
+				}
+				System.out.println(card1 + "," + card2 + ": " + oddsToWin);
+				cardData.append(String.valueOf(card1) + String.valueOf(card2) + "," + oddsToWin + "\n");
+
+			}
+		}
+		if (diffSuite) {
+			sendToFile(cardData, "card" + "Heart" + ".csv");
+		} else {
+			sendToFile(cardData, "card" + "Spades" + ".csv");
+		}
+
 	}
 
 	/**
@@ -144,7 +220,9 @@ public class Odds {
 				e.printStackTrace();
 			}
 
+			// Get the random cards (in addition to the four defined).
 			Hand.getTwoRandomHands(randomGenerator, hand1, hand2, handOneCards, handTwoCards);
+			// Compare the hands, determine if the hand won.
 			if (Hand.compareTwoHands(hand1, hand2) > 0) {
 				handsWon++;
 			}
@@ -166,6 +244,7 @@ public class Odds {
 		double[] ranks = new double[10];
 		Hand hand = null;
 
+		// Go thorugh each possible hand combination.
 		for (int index1 = 0; index1 < 52; index1++) {
 			for (int index2 = index1 + 1; index2 < 52; index2++) {
 				for (int index3 = index2 + 1; index3 < 52; index3++) {
@@ -179,6 +258,8 @@ public class Odds {
 									System.out.println("Illegal hand size.");
 									e.printStackTrace();
 								}
+								// Create our hands, determine rank, adjust
+								// histogram.
 								hand.createHandFromNumbers(cards);
 								ranks[hand.getRank().getRankNum()]++;
 							} else if (hand_size == 7) {
@@ -192,6 +273,8 @@ public class Odds {
 											System.out.println("Illegal hand size.");
 											e.printStackTrace();
 										}
+										// Create our hands, determine rank, adjust
+										// histogram.
 										hand.createHandFromNumbers(cards);
 										ranks[hand.getRank().getRankNum()]++;
 									}
@@ -205,12 +288,11 @@ public class Odds {
 
 		// Divide each count by the number of possible hands.
 		for (int index = 0; index < 10; index++) {
-			if(hand_size == 5) {
+			if (hand_size == 5) {
 				ranks[index] = ranks[index] / 2598960;
-			}else {
+			} else {
 				ranks[index] = ranks[index] / 133784560;
 			}
-			
 		}
 
 		return ranks;
